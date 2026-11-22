@@ -1,0 +1,80 @@
+import {
+  RouterContextProvider,
+  RouterProvider as RouteRenderer,
+} from "@tanstack/solid-router";
+import { createEffect, JSXElement, onMount } from "solid-js";
+
+import * as MonkeyPower from "../../elements/monkey-power";
+import { router } from "../../router/app-router";
+import { getGlobalOffsetTop, isAppReady } from "../../states/core";
+import { isFocusMode } from "../../states/test";
+import { cn } from "../../utils/cn";
+import { convertRemToPixels } from "../../utils/numbers";
+import { Anime } from "../common/anime";
+import { DevTools } from "../dev/DevTools";
+import { FocusModeExit } from "../layout/FocusModeExit";
+import { Footer } from "../layout/footer/Footer";
+import { Header } from "../layout/header/Header";
+import { Overlays } from "../layout/overlays/Overlays";
+import { Modals } from "../modals/Modals";
+import { BarTimerProgress } from "../pages/test/live-stats/BarTimerProgress";
+import { CustomBackground } from "./CustomBackground";
+import { Font } from "./Font";
+import { Funbox } from "./Funbox";
+import { NoCssDetails } from "./NoCssDetails";
+import { Theme } from "./Theme";
+
+export function App(): JSXElement {
+  // until monkey power owns its canvas (L3)
+  onMount(() => MonkeyPower.init());
+
+  // on the root, not #app: the focus mode cursor rule then needs no :has(),
+  // which is slow to match and invalidate on every style recalc
+  createEffect(() => {
+    document.documentElement.toggleAttribute("data-focused", isFocusMode());
+  });
+
+  return (
+    <Providers>
+      <Overlays />
+      <FocusModeExit />
+      <CustomBackground />
+      <Theme />
+      <Font />
+      <Funbox />
+      <BarTimerProgress />
+      <div id="solidmodals">
+        <Modals />
+      </div>
+      <Anime
+        id="app"
+        class={cn("content-grid", { hidden: !isAppReady() })}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isAppReady() ? 1 : 0, duration: 250 }}
+        style={{
+          "padding-top": `${getGlobalOffsetTop() + convertRemToPixels(2)}px`,
+        }}
+      >
+        <Header />
+        <main class="full-width content-grid h-full">
+          <RouteRenderer router={router} />
+        </main>
+        <Footer />
+      </Anime>
+      <DevTools />
+      <NoCssDetails />
+    </Providers>
+  );
+}
+
+/** App-wide context providers. */
+function Providers(props: { children: JSXElement }): JSXElement {
+  return (
+    // lets <Link> etc. work outside the RouterProvider
+    <RouterContextProvider router={router}>
+      {/* a function: the provider calls it inside its context (plain
+      children would be created before, when it reads its props) */}
+      {() => props.children}
+    </RouterContextProvider>
+  );
+}

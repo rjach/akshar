@@ -1,0 +1,87 @@
+[data-ui-element="caret"] {
+  height: 1.2em;
+  background: var(--caret-color);
+  animation: caretFlashSmooth 1s infinite;
+  position: absolute;
+  border-radius: var(--roundness);
+  // transition: 0.05s;
+  transform-origin: top left;
+}
+
+[data-ui-element="paceCaret"] {
+  height: 1.2em;
+  background: var(--sub-color);
+  opacity: 0.5;
+  position: absolute;
+  border-radius: var(--roundness);
+  // transition: 0.25s;
+  transform-origin: top left;
+}
+
+[data-ui-element="caret"],
+[data-ui-element="paceCaret"] {
+  &.debug {
+    outline: 1px solid white;
+    &.hidden {
+      opacity: 0.5 !important;
+      display: block !important;
+    }
+  }
+
+  &[data-ui-variant="off"] {
+    width: 0;
+  }
+
+  &[data-ui-variant="default"] {
+    width: 0.1em;
+  }
+
+  &[data-ui-variant="carrot"] {
+    background-color: transparent;
+    background-image: url("/images/caret/carrot.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 0.25em;
+  }
+
+  &[data-ui-variant="banana"] {
+    background-color: transparent;
+    background-image: url("/images/caret/banana.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 1em;
+  }
+
+  &[data-ui-variant="monkey"] {
+    background-color: transparent;
+    background-image: url("/images/caret/monkey.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 1em;
+  }
+
+  &[data-ui-variant="block"] {
+    width: 0.5em;
+    z-index: -1;
+    border-radius: 0.05em;
+  }
+
+  // a block outline, not blinking
+  &[data-ui-variant="outline"] {
+    width: 0.5em;
+    z-index: -1;
+    animation-name: none;
+    background: transparent;
+    border: 0.05em solid var(--caret-color);
+    border-radius: 0.05em;
+    outline-style: none !important; // override tailwind class of the same name
+  }
+
+  &[data-ui-variant="underline"] {
+    height: 0.1em;
+    width: 0.5em;
+  }
+}

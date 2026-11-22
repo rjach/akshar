@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 Not Found | Akshar</title>
+    <link rel="stylesheet" href="styles/standalone.scss" />
+    <link id="favicon" rel="shortcut icon" href="images/fav.png" />
+    <link rel="shortcut icon" href="images/fav.png" />
+    <meta name="name" content="Akshar" />
+    <meta name="image" content="/images/mtsocial.png" />
+    <meta
+      name="description"
+      content="The most customizable typing test website with a minimal design and a ton of features. Test yourself in various modes, track your progress and improve your speed."
+    />
+    <meta name="keywords" content="nepali typing test, akshar" />
+    <meta name="author" content="Miodec" />
+    <meta property="og:title" content="404 Not Found | Akshar" />
+    <meta property="og:url" content="/" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:description"
+      content="The most customizable typing test website with a minimal design and a ton of features. Test yourself in various modes, track your progress and improve your speed."
+    />
+    <meta property="og:image" content="/images/mtsocial.png" />
+    <meta name="theme-color" content="#e2b714" id="metaThemeColor" />
+    <meta name="twitter:title" content="404 Not Found | Akshar" />
+    <meta name="twitter:image" content="/images/mtsocial.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <script type="module" async>
+      import { loadCSS } from "./ts/utils/misc";
+      loadCSS("/css/fa.min.css", true);
+      document.getElementById("page404").classList.remove("hidden");
+      document.getElementById("page404").classList.remove("hidden");
+      document.querySelector("header").classList.add("focus");
+      document.title = "404 Not Found | Akshar";
+    </script>
+    <load src="html/warnings.html" />
+    <style>
+      h1 {
+        font-weight: unset;
+        font-size: 2rem;
+        margin-top: 3rem;
+        color: var(--sub-color);
+      }
+      header #logo .icon svg path {
+        fill: var(--sub-color);
+      }
+      a.button {
+        border-radius: var(--roundness);
+        text-decoration: none;
+        background: var(--sub-alt-color);
+        color: var(--text-color);
+        &:hover {
+          background: var(--text-color);
+          color: var(--bg-color);
+        }
+      }
+      .page404 {
+        display: grid;
+        justify-content: center;
+        height: 100%;
+        align-content: center;
+      }
+      .page404 .content {
+        display: grid;
+        grid-auto-flow: column;
+        gap: 4rem;
+        grid-template-columns: 300px 300px;
+      }
+      .page404 .image {
+        width: 100%;
+        align-self: center;
+        background-image: url("/images/monkeymeme.jpg");
+        aspect-ratio: 300/199;
+        background-size: contain;
+        border-radius: var(--roundness);
+      }
+
+      .page404 .title {
+        font-size: 5rem;
+        line-height: 4rem;
+        /* margin: -3rem; */
+        color: var(--main-color);
+        align-self: center;
+      }
+
+      .page404 .side {
+        justify-items: center;
+        display: grid;
+        gap: 1rem;
+        text-align: center;
+      }
+      .page404 .big {
+        font-size: 10rem;
+        line-height: 10rem;
+        color: var(--sub-color);
+      }
+
+      .page404 .button {
+        padding: 1rem 2rem;
+        width: max-content;
+      }
+    </style>
+    <div id="app" class="content-grid focus">
+      <header class="focus">
+        <a id="logo" href="/" router-link="">
+          <div class="icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              style="isolation: isolate"
+              viewBox="8 8 48 48"
+            >
+              <path
+                transform="matrix(0.05333 0 0 -0.05333 10.453 48.853)"
+                d="M675,551L675,0L594,0L594,551L521,551L521,622L779,622L779,551L675,551ZM299,632Q356,632 391.5,612Q427,592 443,559.5Q459,527 459,488Q459,418 407.5,374Q356,330 237,320L221,391Q284,399 318,411.5Q352,424 365.5,443Q379,462 379,489Q379,522 358,541.5Q337,561 296,561Q262,561 229.5,551Q197,541 165,521L139,591Q174,611 213.5,621.5Q253,632 299,632ZM475,216Q475,143 427,102.5Q379,62 305,62Q245,62 197.5,88.5Q150,115 109,176.5Q68,238 29,344L100,373Q141,256 187,195.5Q233,135 298,135Q342,135 369,158.5Q396,182 396,225Q396,269 364,301.5Q332,334 293,356L337,369L380,378Q394,367 411,351Q428,335 438,320L448,301Q461,282 468,260.5Q475,239 475,216ZM495,352Q530,352 569.5,359Q609,366 651,384L651,309Q617,293 582,287Q547,281 511,281Q486,281 456.5,285.5Q427,290 399,298L379,352L385,367Q411,359 440,355.5Q469,352 495,352Z"
+              ></path>
+            </svg>
+          </div>
+          <h1 class="text">
+            <div class="top">अक्षर</div>
+            akshar
+          </h1>
+        </a>
+      </header>
+      <main style="height: 100%">
+        <div class="page page404 hidden" id="page404">
+          <div class="content">
+            <div class="image"></div>
+            <div class="side">
+              <div class="title">404</div>
+              <div>Ooops! Looks like this page or resource doesn't exist.</div>
+              <a href="/" class="button" router-link>Go Home</a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

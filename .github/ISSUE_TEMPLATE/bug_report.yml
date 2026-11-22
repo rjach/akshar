@@ -1,0 +1,44 @@
+name: Bug report
+description: Something on Akshar does not work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Select language "nepali unicode"
+        2. Type ...
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Typing mode
+      options:
+        - nepali unicode (romanized)
+        - nepali traditional
+        - nepali (system keyboard / IME)
+        - nepali romanized
+        - english / other language
+        - not related to typing
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Chrome 140 on macOS 15
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, console errors, anything else

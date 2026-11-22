@@ -1,0 +1,39 @@
+import { JSXElement } from "solid-js";
+
+import { playClick, previewClick } from "../../../../audio";
+import { configMetadata } from "../../../../config/metadata";
+import { setConfig } from "../../../../config/setters";
+import { getConfig } from "../../../../config/store";
+import { Slider } from "../../../common/Slider";
+import { SearchableSetting } from "../SearchableSetting";
+
+export function SoundVolume(): JSXElement {
+  return (
+    <SearchableSetting
+      key="soundVolume"
+      title="sound volume"
+      description={configMetadata.soundVolume.description}
+      fa={configMetadata.soundVolume.fa}
+      inputs={
+        <Slider
+          min={0}
+          max={1}
+          step={0.1}
+          text={(value) => {
+            return value.toFixed(1);
+          }}
+          value={getConfig.soundVolume}
+          onChange={(value) => {
+            if (value === getConfig.soundVolume) return;
+            if (getConfig.playSoundOnClick === "off") {
+              void previewClick("1");
+            } else {
+              void playClick();
+            }
+            setConfig("soundVolume", value);
+          }}
+        />
+      }
+    />
+  );
+}

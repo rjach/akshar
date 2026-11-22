@@ -1,0 +1,27 @@
+name: Words, quotes or layout
+description: Report wrong Nepali words, suggest quotes, or fix a keyboard layout
+labels: ["content"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options:
+        - wrong or misspelled word
+        - new quote
+        - keyboard layout mapping
+        - other
+    validations:
+      required: true
+  - type: input
+    id: file
+    attributes:
+      label: Language or layout
+      placeholder: nepali_unicode, nepali_traditional ...
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: The current text and the correct text, or the quote with its source.
+    validations:
+      required: true

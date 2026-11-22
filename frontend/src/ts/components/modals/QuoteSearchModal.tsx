@@ -1,0 +1,419 @@
+import { createForm } from "@tanstack/solid-form";
+import { JSXElement, createSignal, createEffect, For, on } from "solid-js";
+import { z } from "zod";
+
+import { setConfig } from "../../config/setters";
+import { Config } from "../../config/store";
+import QuotesController, { Quote } from "../../controllers/quotes-controller";
+import { createDebouncedEffectOn } from "../../hooks/effects";
+import { hideModalAndClearChain, isModalOpen } from "../../states/modals";
+import { showNoticeNotification } from "../../states/notifications";
+import { showSimpleModal } from "../../states/simple-modal";
+import { setSelectedQuoteId } from "../../states/test";
+import * as TestLogic from "../../test/test-logic";
+import { cn } from "../../utils/cn";
+import { getLanguage } from "../../utils/json-data";
+import * as Misc from "../../utils/misc";
+import {
+  buildSearchService,
+  SearchService,
+  TextExtractor,
+} from "../../utils/search-service";
+import { highlightMatches } from "../../utils/strings";
+import { AnimatedModal } from "../common/AnimatedModal";
+import { Button } from "../common/Button";
+import { InputField } from "../ui/form/InputField";
+import SlimSelect from "../ui/SlimSelect";
+
+const PAGE_SIZE = 100;
+
+const searchServiceCache: Record<string, SearchService<Quote>> = {};
+
+function getSearchService<T>(
+  language: string,
+  data: T[],
+  textExtractor: TextExtractor<T>,
+): SearchService<T> {
+  if (language in searchServiceCache) {
+    return searchServiceCache[language] as unknown as SearchService<T>;
+  }
+  const newSearchService = buildSearchService<T>(data, textExtractor);
+  searchServiceCache[language] =
+    newSearchService as unknown as (typeof searchServiceCache)[typeof language];
+  return newSearchService;
+}
+
+function exactSearch(quotes: Quote[], captured: RegExp[]): [Quote[], string[]] {
+  const matches: Quote[] = [];
+  const exactSearchQueryTerms: Set<string> = new Set<string>();
+
+  for (const quote of quotes) {
+    const textAndSource = quote.text + quote.source;
+    const currentMatches: string[] = [];
+    let noMatch = false;
+
+    for (const regex of captured) {
+      const match = textAndSource.match(regex);
+      if (!match) {
+        noMatch = true;
+        break;
+      }
+      currentMatches.push(Misc.escapeRegExp(match[0]));
+    }
+
+    if (!noMatch) {
+      currentMatches.forEach((m) => exactSearchQueryTerms.add(m));
+      matches.push(quote);
+    }
+  }
+
+  return [matches, Array.from(exactSearchQueryTerms)];
+}
+
+function getLengthDesc(quote: Quote): string {
+  if (quote.length < 101) return "short";
+  if (quote.length < 301) return "medium";
+  if (quote.length < 601) return "long";
+  return "thicc";
+}
+
+function Item(props: {
+  quote: Quote;
+  matchedTerms: string[];
+  isRtl: boolean;
+  onSelect: () => void;
+}): JSXElement {
+  return (
+    <div
+      class="grid cursor-pointer gap-2 rounded p-4 transition-[background-color] duration-125 select-none hover:bg-sub-alt"
+      onClick={() => props.onSelect()}
+    >
+      <div
+        class="text-text [&_.highlight]:text-main"
+        dir="auto"
+        // oxlint-disable-next-line solid/no-innerhtml
+        innerHTML={highlightMatches(
+          Misc.escapeHTML(props.quote.text),
+          props.matchedTerms,
+        )}
+      ></div>
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_3fr]">
+        <div class="text-xs text-sub">
+          <div class="opacity-50">id</div>
+          <span
+            class="[&_.highlight]:text-main"
+            // oxlint-disable-next-line solid/no-innerhtml
+            innerHTML={highlightMatches(
+              Misc.escapeHTML(props.quote.id.toString()),
+              props.matchedTerms,
+            )}
+          ></span>
+        </div>
+        <div class="text-xs text-sub">
+          <div class="opacity-50">length</div>
+          {getLengthDesc(props.quote)}
+        </div>
+        <div class="col-span-2 flex sm:col-span-1">
+          <div class="grow text-xs text-sub">
+            <div class="opacity-50">source</div>
+            <span
+              class="[&_.highlight]:text-main"
+              // oxlint-disable-next-line solid/no-innerhtml
+              innerHTML={highlightMatches(
+                Misc.escapeHTML(props.quote.source),
+                props.matchedTerms,
+              )}
+            ></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function QuoteSearchModal(): JSXElement {
+  const form = createForm(() => ({
+    defaultValues: {
+      searchText: "",
+    },
+  }));
+
+  const [currentPage, setCurrentPage] = createSignal(1);
+  const [lengthFilter, setLengthFilter] = createSignal<string[]>([]);
+  const [customFilterMin, setCustomFilterMin] = createSignal(0);
+  const [customFilterMax, setCustomFilterMax] = createSignal(0);
+  const [hasCustomFilter, setHasCustomFilter] = createSignal(false);
+  const [quotes, setQuotes] = createSignal<Quote[]>([]);
+  const [searchResults, setSearchResults] = createSignal<{
+    quotes: Quote[];
+    matchedTerms: string[];
+  }>({ quotes: [], matchedTerms: [] });
+  const [isRtl, setIsRtl] = createSignal(false);
+
+  const [searchText, setSearchText] = createSignal("");
+  createDebouncedEffectOn(
+    250,
+    searchText,
+    (text) => {
+      setCurrentPage(1);
+      performSearch(text);
+    },
+    { defer: true },
+  );
+
+  const isOpen = (): boolean => isModalOpen("QuoteSearch");
+
+  const performSearch = (text: string): void => {
+    const allQuotes = quotes();
+    if (allQuotes.length === 0) {
+      setSearchResults({ quotes: [], matchedTerms: [] });
+      return;
+    }
+
+    let matches: Quote[] = [];
+    let matchedQueryTerms: string[] = [];
+
+    if (text === "") {
+      setSearchResults({ quotes: allQuotes, matchedTerms: [] });
+      return;
+    }
+
+    let exactSearchMatches: Quote[] = [];
+    let exactSearchMatchedQueryTerms: string[] = [];
+
+    const quotationsRegex = /"(.*?)"/g;
+    const exactSearchQueries = Array.from(text.matchAll(quotationsRegex));
+    const removedSearchText = text.replaceAll(quotationsRegex, "");
+
+    if (exactSearchQueries[0]) {
+      const searchQueriesRaw = exactSearchQueries.map(
+        (query) => new RegExp(Misc.escapeRegExp(query[1] ?? ""), "i"),
+      );
+      [exactSearchMatches, exactSearchMatchedQueryTerms] = exactSearch(
+        allQuotes,
+        searchQueriesRaw,
+      );
+    }
+
+    const quoteSearchService = getSearchService<Quote>(
+      Config.language,
+      allQuotes,
+      (quote: Quote) => `${quote.text} ${quote.id} ${quote.source}`,
+    );
+
+    if (exactSearchMatches.length > 0 || removedSearchText === text) {
+      const ids = exactSearchMatches.map((m) => m.id);
+      ({ results: matches, matchedQueryTerms } = quoteSearchService.query(
+        removedSearchText,
+        ids,
+      ));
+      exactSearchMatches.forEach((m) => {
+        if (!matches.includes(m)) matches.push(m);
+      });
+      matchedQueryTerms = [
+        ...exactSearchMatchedQueryTerms,
+        ...matchedQueryTerms,
+      ];
+    }
+
+    setSearchResults({
+      quotes: matches,
+      matchedTerms: matchedQueryTerms.map(Misc.escapeHTML),
+    });
+  };
+
+  const filteredQuotes = (): Quote[] => {
+    let result = searchResults().quotes;
+
+    const lengths = lengthFilter();
+    if (lengths.length > 0) {
+      const groupFilter = new Set(
+        lengths.filter((v) => v !== "4").map((v) => parseInt(v, 10)),
+      );
+      const hasCustom = lengths.includes("4");
+
+      result = result.filter((quote) => {
+        if (groupFilter.has(quote.group)) return true;
+        if (
+          hasCustom &&
+          hasCustomFilter() &&
+          quote.length >= customFilterMin() &&
+          quote.length <= customFilterMax()
+        ) {
+          return true;
+        }
+        return false;
+      });
+    }
+
+    return result;
+  };
+
+  const totalPages = (): number =>
+    Math.max(1, Math.ceil(filteredQuotes().length / PAGE_SIZE));
+
+  const pageQuotes = (): Quote[] => {
+    const start = (currentPage() - 1) * PAGE_SIZE;
+    return filteredQuotes().slice(start, start + PAGE_SIZE);
+  };
+
+  const pageInfo = (): string => {
+    const filtered = filteredQuotes();
+    if (filtered.length === 0) return "No search results";
+    const start = (currentPage() - 1) * PAGE_SIZE + 1;
+    const end = Math.min(currentPage() * PAGE_SIZE, filtered.length);
+    return `${start} - ${end} of ${filtered.length}`;
+  };
+
+  createEffect(
+    on(lengthFilter, (lengths) => {
+      if (!lengths.includes("4")) {
+        setHasCustomFilter(false);
+      } else if (!hasCustomFilter()) {
+        showSimpleModal({
+          title: "Enter minimum and maximum number of words",
+          buttonText: "save",
+          schema: z.object({
+            min: z.number().int().safe().positive(),
+            max: z.number().int().safe().positive(),
+          }),
+          inputs: {
+            min: { type: "number", placeholder: "1" },
+            max: { type: "number", placeholder: "100" },
+          },
+
+          execFn: async ({ min, max }) => {
+            setCustomFilterMin(min);
+            setCustomFilterMax(max);
+            setHasCustomFilter(true);
+            return { status: "success", showNotification: false };
+          },
+        });
+      }
+    }),
+  );
+
+  const handleBeforeShow = (isChained: boolean): void => {
+    if (isChained) return;
+    form.reset();
+    setSearchText("");
+    setCurrentPage(1);
+    setLengthFilter([]);
+    setHasCustomFilter(false);
+  };
+
+  const handleAfterShow = async (): Promise<void> => {
+    const quotesLanguage = await getLanguage(Config.language);
+    setIsRtl(quotesLanguage?.rightToLeft ?? false);
+    const { quotes: fetchedQuotes } = await QuotesController.getQuotes(
+      Config.language,
+    );
+    setQuotes(fetchedQuotes);
+    performSearch(form.state.values.searchText);
+  };
+
+  const applyQuote = (quoteId: number): void => {
+    if (isNaN(quoteId) || quoteId < 0) {
+      showNoticeNotification("Quote ID must be at least 1");
+      return;
+    }
+    setSelectedQuoteId(quoteId);
+    setConfig("quoteLength", [-2]);
+    void TestLogic.restartTest();
+    hideModalAndClearChain("QuoteSearch");
+  };
+
+  return (
+    <AnimatedModal
+      id="QuoteSearch"
+      focusFirstInput={true}
+      beforeShow={handleBeforeShow}
+      afterShow={handleAfterShow}
+      modalClass="max-w-[1000px] h-[80vh] grid-rows-[auto_auto_1fr_auto]"
+    >
+      <div class="text-2xl text-sub">Quote search</div>
+      <div class="flex flex-col gap-4 sm:flex-row">
+        <form.Field
+          name="searchText"
+          listeners={{
+            onChange: ({ value }) => {
+              if (!isOpen()) return;
+              setSearchText(value);
+            },
+          }}
+          children={(field) => (
+            <InputField
+              class="grow-3"
+              field={field}
+              placeholder="filter by text, source or id"
+              autocomplete="off"
+              dir="auto"
+              maxLength={200}
+            />
+          )}
+        />
+        <div class="grow">
+          <SlimSelect
+            appendTo="container"
+            multiple
+            options={[
+              { value: "0", text: "short" },
+              { value: "1", text: "medium" },
+              { value: "2", text: "long" },
+              { value: "3", text: "thicc" },
+              { value: "4", text: "custom" },
+            ]}
+            selected={lengthFilter()}
+            onChange={(val) => setLengthFilter(val)}
+            settings={{
+              showSearch: false,
+              placeholderText: "filter by length",
+            }}
+          />
+        </div>
+      </div>
+      <div
+        class="grid content-baseline gap-2 overflow-y-auto"
+        dir={isRtl() ? "rtl" : undefined}
+      >
+        <For each={pageQuotes()}>
+          {(quote) => (
+            <Item
+              quote={quote}
+              matchedTerms={searchResults().matchedTerms}
+              isRtl={isRtl()}
+              onSelect={() => applyQuote(quote.id)}
+            />
+          )}
+        </For>
+      </div>
+      <div
+        class={cn(
+          "grid grid-cols-2 items-center justify-center gap-2",
+          "sm:grid-cols-3",
+        )}
+      >
+        <Button
+          class="justify-self-end px-10 sm:w-max"
+          fa={{ icon: "fa-chevron-left", fixedWidth: true }}
+          disabled={currentPage() <= 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+        />
+        <div
+          class={cn(
+            "col-span-2 row-start-1 px-4 text-center text-sub",
+            "sm:col-span-1 sm:row-auto",
+          )}
+        >
+          {pageInfo()}
+        </div>
+        <Button
+          class="px-10 sm:w-max"
+          fa={{ icon: "fa-chevron-right", fixedWidth: true }}
+          disabled={currentPage() >= totalPages()}
+          onClick={() => setCurrentPage((p) => p + 1)}
+        />
+      </div>
+    </AnimatedModal>
+  );
+}

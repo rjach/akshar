@@ -1,0 +1,24 @@
+packages:
+  - frontend
+  - packages/*
+  - frontend/storybook
+
+allowBuilds:
+  "@firebase/util": set this to true or false
+  "@fortawesome/fontawesome-free": true
+  "@parcel/watcher": true
+  "@sentry/cli": set this to true or false
+  bcrypt: set this to true or false
+  core-js: true
+  cpu-features: set this to true or false
+  esbuild: true
+  msgpackr-extract: set this to true or false
+  protobufjs: set this to true or false
+  re2: set this to true or false
+  ssh2: set this to true or false
+
+overrides:
+  "postcss": "8.5.8"
+engineStrict: true
+saveExact: true
+savePrefix: ""

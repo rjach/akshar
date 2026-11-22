@@ -1,0 +1,16 @@
+[data-nav-item="test"],
+[data-nav-item="account"],
+[data-nav-item="login"] {
+  --themable-button-text: #ff0000;
+  --themable-button-hover-text: color-mix(
+    in srgb,
+    var(--themable-button-text) 75%,
+    black 25%
+  );
+}
+
+/* blind mode must not reveal errors, so keep the error underline off there */
+[data-ui-element="words"]:not([data-ui-blind])
+  [data-ui-element="word"][data-ui-state="typedIncorrectly"] {
+  border-bottom: solid 2px #ff0000;
+}

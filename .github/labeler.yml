@@ -1,0 +1,55 @@
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          [
+            "frontend/src/**",
+            "frontend/vite.config.ts",
+            "frontend/vite-plugins/**",
+          ]
+
+packages:
+  - changed-files:
+      - any-glob-to-any-file: ["packages/**"]
+
+language:
+  - changed-files:
+      - any-glob-to-any-file: ["frontend/static/languages/**"]
+
+quote:
+  - changed-files:
+      - any-glob-to-any-file: ["frontend/static/quotes/**"]
+
+layout:
+  - changed-files:
+      - any-glob-to-any-file: ["frontend/static/layouts/**"]
+
+theme:
+  - changed-files:
+      - any-glob-to-any-file:
+          ["frontend/static/themes/**", "frontend/src/ts/constants/themes.ts"]
+
+seo:
+  - changed-files:
+      - any-glob-to-any-file:
+          [
+            "frontend/scripts/seo/**",
+            "frontend/scripts/generate-seo.ts",
+            "frontend/src/ts/constants/seo-guides.ts",
+          ]
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file: ["**/__tests__/**", "**/*.spec.ts"]
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "*.md"]
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          [".github/**", "vercel.json", "frontend/scripts/vercel-build.sh"]
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: ["pnpm-lock.yaml", "**/package.json"]
