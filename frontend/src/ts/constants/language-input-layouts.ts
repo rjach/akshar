@@ -9,12 +9,14 @@ import type { Language } from "@monkeytype/schemas/languages";
 const LANGUAGE_INPUT_LAYOUTS: Partial<Record<Language, Layout>> = {
   nepali_unicode: "nepali_unicode_romanized",
   nepali_traditional: "nepali_traditional",
+  nepali_preeti: "nepali_preeti",
 };
 
 /** The language a keyboard variant types: same words, quotes and script. */
 const BASE_LANGUAGES: Partial<Record<Language, Language>> = {
   nepali_unicode: "nepali",
   nepali_traditional: "nepali",
+  nepali_preeti: "nepali",
 };
 
 /** `language` without its keyboard variant, eg. nepali_traditional -> nepali. */

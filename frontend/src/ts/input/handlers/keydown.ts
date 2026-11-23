@@ -3,6 +3,7 @@ import { Config } from "../../config/store";
 import * as TestLogic from "../../test/test-logic";
 import { getCharFromEvent } from "../../test/layout-emulator";
 import { emulateInsertText } from "./insert-text";
+import { typePreetiKey, undoPreetiKey } from "../helpers/preeti-input";
 import {
   showNoticeNotification,
   showErrorNotification,
@@ -162,10 +163,22 @@ export async function onKeydown(event: KeyboardEvent): Promise<void> {
     return;
   }
 
-  if (getEffectiveInputLayout(Config.layout, Config.language) !== "default") {
+  const inputLayout = getEffectiveInputLayout(Config.layout, Config.language);
+  const isPreeti = inputLayout === "nepali_preeti";
+
+  if (isPreeti && event.key === "Backspace" && undoPreetiKey(event)) {
+    event.preventDefault();
+    return;
+  }
+
+  if (inputLayout !== "default") {
     const emulatedChar = await getCharFromEvent(event);
     if (emulatedChar !== null) {
-      await emulateInsertText({ data: emulatedChar, now });
+      if (isPreeti) {
+        await typePreetiKey(emulatedChar, now);
+      } else {
+        await emulateInsertText({ data: emulatedChar, now });
+      }
       event.preventDefault();
       return;
     }

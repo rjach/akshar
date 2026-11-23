@@ -17,6 +17,12 @@ describe("getEffectiveInputLayout", () => {
     );
   });
 
+  it("types nepali preeti through the preeti keyboard", () => {
+    expect(getEffectiveInputLayout("default", "nepali_preeti")).toBe(
+      "nepali_preeti",
+    );
+  });
+
   it("keeps the system keyboard for plain nepali and english", () => {
     expect(getEffectiveInputLayout("default", "nepali")).toBe("default");
     expect(getEffectiveInputLayout("default", "english")).toBe("default");

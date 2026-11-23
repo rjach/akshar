@@ -7,6 +7,7 @@ export const LanguageSchema = z.enum(
     // Nepali first: it's the default and the list shows in this order
     "nepali_unicode",
     "nepali_traditional",
+    "nepali_preeti",
     "nepali",
     "nepali_1k",
     "nepali_romanized",
