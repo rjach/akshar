@@ -6,6 +6,7 @@ export const LanguageGroups: Record<string, Language[]> = {
   nepali: [
     "nepali_unicode",
     "nepali_traditional",
+    "nepali_preeti",
     "nepali",
     "nepali_1k",
     "nepali_romanized",

@@ -93,6 +93,7 @@ export const LayoutNameSchema = z.enum(
     "hindi_inscript",
     "nepali_unicode_romanized",
     "nepali_traditional",
+    "nepali_preeti",
     "thai_kedmanee",
     "thai_pattachote",
     "thai_manoonchai",

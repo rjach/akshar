@@ -1,7 +1,7 @@
 # Akshar (अक्षर)
 
 A minimalistic Nepali typing test. Type Devanagari with the Nepali Unicode
-(romanized) or Nepali Traditional keyboard from any physical keyboard, or switch
+(romanized), Nepali Traditional or Preeti keyboard from any physical keyboard, or switch
 to English and dozens of other languages.
 
 **Live:** https://akshar.rojanacharya.com
@@ -16,6 +16,8 @@ released under the same [GPL-3.0](LICENSE) license. See [Credits](#credits).
 - **Nepali first.** `nepali unicode` is preselected. The language list starts with:
   - `nepali unicode`: Nepali Unicode (romanized) keyboard, emulated from any keyboard
   - `nepali traditional`: Nepali Traditional keyboard, emulated from any keyboard
+  - `nepali preeti`: the Preeti font's keyboard, typed in Preeti order (ि
+    before its letter, reph after) and composed into Unicode
   - `nepali` / `nepali 1k`: type with your own system keyboard or IME
   - `nepali romanized`: Nepali written in Latin letters
 - **English and every upstream language** remain one click away.

@@ -25,6 +25,7 @@ body:
       options:
         - nepali unicode (romanized)
         - nepali traditional
+        - nepali preeti
         - nepali (system keyboard / IME)
         - nepali romanized
         - english / other language

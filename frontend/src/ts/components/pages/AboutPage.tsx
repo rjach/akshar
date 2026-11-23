@@ -19,12 +19,12 @@ export function AboutPage(): JSXElement {
         <H2 fa={{ icon: "fa-info-circle" }} text="about" />
         <p>
           Akshar ({BRAND.nameNepali}) is a minimalistic typing test made for
-          Nepali. Type in Devanagari with the Nepali Unicode (romanized) or
-          Nepali Traditional keyboard straight from any physical keyboard - no
-          Nepali input method needed - or switch to English and dozens of other
-          languages. It keeps everything that makes a good typing test: many
-          test modes, themes, sounds, a smooth caret and real-time feedback on
-          typos, speed and accuracy.
+          Nepali. Type in Devanagari with the Nepali Unicode (romanized), Nepali
+          Traditional or Preeti keyboard straight from any physical keyboard -
+          no Nepali input method needed - or switch to English and dozens of
+          other languages. It keeps everything that makes a good typing test:
+          many test modes, themes, sounds, a smooth caret and real-time feedback
+          on typos, speed and accuracy.
           <br />
           <br />
           There are no accounts. Your results, personal bests and settings are
@@ -37,7 +37,8 @@ export function AboutPage(): JSXElement {
         <p>
           By default, tests use 1000 common Nepali words typed with the Nepali
           Unicode (romanized) keyboard. Pick &quot;nepali traditional&quot; for
-          the Traditional keyboard, &quot;nepali&quot; to type with your own
+          the Traditional keyboard, &quot;nepali preeti&quot; to type the way
+          the Preeti font taught you, &quot;nepali&quot; to type with your own
           system keyboard, &quot;nepali romanized&quot; for Nepali written in
           Latin letters, or any other language such as English from the language
           list.
